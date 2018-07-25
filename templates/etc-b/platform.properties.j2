@@ -1,0 +1,69 @@
+#<!-- ==============================================================================  -->
+#<!-- Properties that are shared by all servers on this platform (dev, QA, UAT, prod) -->
+#<!-- ==============================================================================  -->
+
+environment.name={{ platenv }}
+
+authServer.host=172.23.245.146
+authServer.port=4033
+
+email.host.name=localhost
+
+internal.security.ad=true
+internal.security.ad.wsriagauth=true
+internal.security.restricted=false
+
+InvalidPaymentInfo.email.to={{ notifyemail }}
+
+procheck.url=https://identitymanagement.lexisnexis.com/bls-web/BlsServlet
+id.management.url=https://identitymanagement.lexisnexis.com/identity-proofing/services/identityProofingServiceWS/v2?wsdl
+
+connectship.url=http://vcnupsprod/Progistics/XML_Processor/Server/XMLProcDLL.asp
+
+CloseFtpJob.server=208.255.233.15
+  
+vps.rcp.webservices.host=https://services.vitalchek.com
+vps.rcp.webservices.context=VPSService
+
+wsdl.reWrite.run=1
+      
+#cache.developer.only.mode=True
+developer.index.mode=false
+developer.auth.index.mode=False
+
+logfile.email.from=DoNotReply@vitalchek.com
+logfile.email.to={{ notifyemail }}
+
+use.jms.queue.send.email=false
+
+orderstatus.url=http://208.255.233.218:82/VitalChek.Service.OrderStatus/OrderStatusWS.asmx
+orderstatus.url.wsdl=http://208.255.233.218:82/VitalChek.Service.OrderStatus/OrderStatusWS.asmx?wsdl
+
+#order.index.location=/vc/vps/indexes/orders/Orders
+search.using.index=false
+search.db.by.offline.table=True
+write.offline.index.table=True
+
+legacy.dot.url=https://www.enetwizard.com/shop/process_dot_payment_request.aspx
+
+co.courts.denver.url=https://svc.denvercountycourt.org/CommercialServices/courtcase.svc?wsdl 
+co.courts.denver.user.id=LexisNexisPRD
+co.courts.denver.password=j38v7n5x0w
+ 
+clamav.host=bwdclam.risk.regn.net
+clamav.port=3310
+
+key.maintenance.utility.url=https://alplzpci001.pci.choicepoint.net:15002/KeyEncryptionWS/services/KeyEncryption?wsdl
+key.encrypt.failure.email.list={{ notifyemail }}
+
+encrypt.thread.lock.wait.time.ms=500
+
+use.http.for.san=true
+vps.file.server.url=http://vps-images.risk.regn.net:18080/vpsfileserver
+vps.file.server.http.timeout=5000
+vps.file.server.socket.timeout=5000
+vps.file.server.pool.timeout=10000
+vps.file.server.http.pool.size=100
+vps.file.server.http.pool.connections.per.route=50
+
+log.externalFacing.IntegrationCall=true

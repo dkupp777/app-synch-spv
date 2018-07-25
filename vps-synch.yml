@@ -1,0 +1,81 @@
+---
+- hosts: appsource
+  remote_user: svc_devops
+  become: yes
+  become_method: sudo
+  gather_facts: true
+  ignore_errors: yes
+  tasks:
+  - name: synchronize /vc/vpsservice from vcnlpis24 to bwdlpfs20 /media/deploy/packages/vc-apps
+    synchronize:
+      src: /vc/vpsservice/
+      dest: /media/deploy/packages/vc-apps/vpsservice
+      recursive: yes
+      rsync_opts:
+        - "--exclude=current/standalone/log"
+    delegate_to: "{{ inventory_hostname }}"
+  - name: synchronize /vc/vpsservice-b from vcnlpis24 to bwdlpfs20 /media/deploy/packages/vc-apps
+    synchronize:
+      src: /vc/vpsservice-b/
+      dest: /media/deploy/packages/vc-apps/vpsservice-b
+      recursive: yes
+      rsync_opts:
+        - "--exclude=current/standalone/log"
+    delegate_to: "{{ inventory_hostname }}"
+  - name: synchronize /vc/etc from vcnlpis24 to bwdlpfs20 /media/deploy/packages/vc-apps
+    synchronize:
+      src: /vc/etc/
+      dest: /media/deploy/packages/vc-apps/etc
+      recursive: yes
+    delegate_to: "{{ inventory_hostname }}"
+  - name: synchronize /vc/etc-b from vcnlpis24 to bwdlpfs20 /media/deploy/packages/vc-apps
+    synchronize:
+      src: /vc/etc-b/
+      dest: /media/deploy/packages/vc-apps/etc-b
+      recursive: yes
+    delegate_to: "{{ inventory_hostname }}"
+  - name: synchronize cacerts file from vcnlpis24 to bwdlpfs20 /media/deploy/packages/vc-apps/javacrt/
+    synchronize:
+      src: /opt/java/current/jre/lib/security/cacerts
+      dest: /media/deploy/packages/vc-apps/javacrt/cacerts
+    delegate_to: "{{ inventory_hostname }}"    
+- hosts: fs20
+  remote_user: svc_devops
+  become: yes
+  become_method: sudo
+  gather_facts: true
+  ignore_errors: yes
+  tasks:
+  #- name: delete vpsservice logs
+  #  shell: "rm -Rf /images/deploy/vc-apps/vpsservice/current/standalone/log/*"
+  - name: find vpsservice log files
+    find: 
+      paths: /images/deploy/packages/vc-apps/vpsservice/current/standalone/log
+      patterns: "*"
+    register: vpsservice_logs
+  - name: remove vpsservice log files
+    file: 
+      path: "{{ item['path'] }}"
+      state: absent
+    with_items: "{{ vpsservice_logs['files'] }}"
+  - name: find vpsservice_B log files
+    find: 
+      paths: /images/deploy/packages/vc-apps/vpsservice-b/current/standalone/log
+      patterns: "*"
+    register: vpsservice_B_logs
+  - name: remove vpsservice_B log files
+    file: 
+      path: "{{ item['path'] }}"
+      state: absent
+    with_items: "{{ vpsservice_B_logs['files'] }}"
+  - name: remove vpsservice_wsdl files
+    shell: 'rm -Rf /images/deploy/packages/vc-apps/vpsservice/current/data/wsdl/*'
+  - name: remove vpsservice_jboss files
+    shell: 'rm -Rf /images/deploy/packages/vc-apps/vpsservice/current/standalone/tmp/*'
+  - name: remove vpsservice_B_wsdl files
+    shell: 'rm -Rf /images/deploy/packages/vc-apps/vpsservice-b/current/data/wsdl/*'
+  - name: remove vpsservice_B_jboss files
+    shell: 'rm -Rf /images/deploy/packages/vc-apps/vpsservice-b/current/standalone/tmp/*'
+  - name: synchronize script to update ALALPVCNFS01
+    command: '/root/adminapps/rsync_deploy_to_alalpvcnfs01.sh'
+    

@@ -1,0 +1,15 @@
+---
+vpsAport: 9080
+vpsBport: 19080
+app1: vpsservice
+app2: vpsservice-b
+app3: vpsservice-c
+app4: vpsservice-d
+dbserver:  "{{ 'prodalp.pci.choicepoint.net' if ansible_default_ipv4.network == '10.253.83.0' else 'prodalp.pci.choicepoint.net' if ansible_default_ipv4.network == '10.253.84.0' else 'prodsql01' }}"
+dbninteg: "{{ 'VPS_Integration_DR' if ansible_default_ipv4.network == '10.253.83.0' else 'VPS Integration_DR' if ansible_default_ipv4.network == '10.253.84.0' else 'VPS_Integration' }}"
+dbnvcecomm: "{{ 'vcecommerce_DR' if ansible_default_ipv4.network == '10.253.83.0' else 'vcecommerce_DR' if ansible_default_ipv4.network == '10.253.84.0' else 'vcecommerce' }}"
+dbnantares: "{{ 'Antares_VPS_DR' if ansible_default_ipv4.network == '10.253.83.0' else 'Antares_VPS_DR' if ansible_default_ipv4.network == '10.253.84.0' else 'Antares_VPS' }}"
+dbnvcprov: "{{ 'vcprovider_DR' if ansible_default_ipv4.network == '10.253.83.0' else 'vcprovider_DR' if ansible_default_ipv4.network == '10.253.84.0' else 'vcprovider' }}"
+dbnmapp: "{{ 'mapp_history_DR' if ansible_default_ipv4.network == '10.253.83.0' else 'mapp_history_DR' if ansible_default_ipv4.network == '10.253.84.0' else 'mapp_history' }}"
+platenv: "{{ 'qa' if ansible_default_ipv4.network == '10.253.83.0' else 'qa' if ansible_default_ipv4.network == '10.253.84.0' else 'dev' }}"
+notifyemail: none@none.com

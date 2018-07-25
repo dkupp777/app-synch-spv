@@ -1,0 +1,175 @@
+---
+- import_playbook: vps-synch.yml
+- hosts: alaapp
+  remote_user: svc_devops
+  become: yes
+  become_method: sudo
+  gather_facts: true
+  ignore_errors: yes
+  vars_files:
+    - vars.yml
+  tasks:
+  - name: ensure vps group
+    group:
+      name: vps
+      gid: 2000
+      state: present
+  - name: ensure vps user
+    user: 
+      name: vps
+      group: vps
+      uid: 2000
+
+  - name: copy vpsservice directory to target
+    synchronize:
+      src: /media/deploy/packages/vc-apps/{{ app1 }}/
+      dest: /vc/{{ app1 }}
+    rsync_opts:
+      - "--exclude=current/standalone/log"
+      - "--delete=yes"
+    delegate_to: "{{ inventory_hostname }}"
+  - name: copy vpsservice-b directory to target
+    synchronize:
+      src: /media/deploy/packages/vc-apps/{{ app2 }}/
+      dest: /vc/{{ app2 }}
+    rsync_opts:
+      - "--exclude=current/standalone/log"
+      - "--delete=yes"
+    delegate_to: "{{ inventory_hostname }}"
+  - name: copy etc directory to target
+    synchronize:
+      src: /media/deploy/packages/vc-apps/etc/config/jboss-eap-6.3/
+      dest: /vc/etc/config/jboss-eap-6.3
+    delegate_to: "{{ inventory_hostname }}"
+  - name: copy etc-b directory to target
+    synchronize:
+      src: /media/deploy/packages/vc-apps/etc-b/
+      dest: /vc/etc-b
+    delegate_to: "{{ inventory_hostname }}"
+  - name: copy java cacerts to target
+    synchronize:
+      src: /media/deploy/packages/vc-apps/javacrt/cacerts
+      dest: /opt/java/current/jre/lib/security/cacerts
+    delegate_to: "{{ inventory_hostname }}"     
+  - name: update VPS credentials.properties
+    template: 
+      src: templates/etc/credentials.properties.j2
+      dest: /vc/etc/config/jboss-eap-6.3/conf/credentials.properties
+  - name: update VPS-b credentials.properties
+    template: 
+      src: templates/etc-b/credentials.properties.j2
+      dest: /vc/etc-b/config/jboss-eap-6.3/conf/credentials.properties      
+  
+  - name:  update VPS local.properties
+    template: 
+      src: templates/etc/local.properties.j2
+      dest: /vc/etc/config/jboss-eap-6.3/conf/local.properties
+  - name:  update VPS-b local.properties
+    template: 
+      src: templates/etc-b/local.properties.j2
+      dest: /vc/etc-b/config/jboss-eap-6.3/conf/local.properties
+  
+  - name: update VPS global.properties
+    template: 
+      src: templates/etc/global.properties.j2
+      dest: /vc/etc/config/jboss-eap-6.3/conf/global.properties
+  - name: update VPS-b global.properties
+    template: 
+      src: templates/etc-b/global.properties.j2
+      dest: /vc/etc-b/config/jboss-eap-6.3/conf/global.properties
+      
+  - name: update VPS platform.properties
+    template: 
+      src: templates/etc/platform.properties.j2
+      dest: /vc/etc/config/jboss-eap-6.3/conf/platform.properties
+  - name: update VPS-b platform.properties
+    template: 
+      src: templates/etc-b/platform.properties.j2
+      dest: /vc/etc-b/config/jboss-eap-6.3/conf/platform.properties
+      
+  - name: update VPS standalone.xml
+    template: 
+      src: templates/vps/standalone.xml.j2
+      dest: /vc/{{ app1 }}/current/standalone/configuration/standalone.xml
+  - name: update VPS-b standalone.xml
+    template: 
+      src: templates/vps-b/standalone.xml.j2
+      dest: /vc/{{ app2 }}/current/standalone/configuration/standalone.xml
+      
+  - name: update VPS vpsjdbcquartz.properties
+    template: 
+      src: templates/vps/vpsjdbcquartz.properties.j2
+      dest: /vc/{{ app1 }}/current/modules/com/vitalchek/configuration/main/vpsjdbcquartz.properties
+  - name: update VPS-b vpsjdbcquartz.properties
+    template: 
+      src: templates/vps-b/vpsjdbcquartz.properties.j2
+      dest: /vc/{{ app2 }}/current/modules/com/vitalchek/configuration/main/vpsjdbcquartz.properties
+      
+  - name: update VPS aes.encryptionUtil.properties
+    template: 
+      src: templates/etc/aes.encryptionUtil.properties.j2
+      dest: /vc/etc/config/jboss-eap-6.3/conf/aes.encryptionUtil.properties
+  - name: update VPS-b aes.encryptionUtil.properties
+    template: 
+      src: templates/etc-b/aes.encryptionUtil.properties.j2
+      dest: /vc/etc-b/config/jboss-eap-6.3/conf/aes.encryptionUtil.properties
+      
+  - name: set vps directory ownership
+    file: 
+      dest=/vc/{{ app1 }}
+      owner=2000
+      group=2000
+      mode=0755
+      recurse=yes
+  - name: set vps directory ownership
+    file: 
+      dest=/vc/{{ app2 }}
+      owner=2000
+      group=2000
+      mode=0755
+      recurse=yes
+  - name: copy {{ app1 }} start script
+    template:
+      src: templates/services/vpsservice.j2
+      dest: /etc/rc.d/init.d/{{ app1 }}
+  - name: configure permissions on {{ app1 }} start script
+    file: 
+      dest=/etc/rc.d/init.d/{{ app1 }}
+      mode=0755
+  - name: configure {{ app1 }} service to autostart
+    service:
+      name: "{{ app1 }}"
+      enabled: yes
+  - name: copy {{ app2 }} start script
+    template:
+      src: templates/services/vpsservice-b.j2
+      dest: /etc/rc.d/init.d/{{ app2 }}
+  - name: configure permissions on {{ app2 }} start script
+    file: 
+      dest=/etc/rc.d/init.d/{{ app2 }}
+      mode=0755
+  - name: configure {{ app2 }} service to autostart
+    service:
+      name: "{{ app2 }}"
+      enabled: yes      
+  - name: copy {{ app1 }} logrotate configuraton template
+    template: 
+      src: "templates/logrotate.{{ app1 }}.j2"
+      dest: "/etc/logrotate.d/{{ app1 }}"
+  - name: copy {{ app1 }} rsyslog configuration template
+    template: 
+      src: "templates/rsyslog.{{ app1 }}.conf.j2"
+      dest: "/etc/rsyslog.d/{{ app1 }}.conf"
+  - name: copy {{ app2 }} logrotate configuraton template
+    template: 
+      src: "templates/logrotate.{{ app2 }}.j2"
+      dest: "/etc/logrotate.d/{{ app2 }}"
+  - name: copy {{ app2 }} rsyslog configuration template
+    template: 
+      src: "templates/rsyslog.{{ app2 }}.conf.j2"
+      dest: "/etc/rsyslog.d/{{ app2 }}.conf"
+  - name: restart rsyslog
+    command: 'service rsyslog restart'
+      
+      
+      

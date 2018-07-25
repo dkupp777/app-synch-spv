@@ -1,0 +1,15 @@
+#<!-- ========================================== -->
+#<!-- Properties that apply only to this server  -->
+#<!-- ========================================== -->
+
+server.name={{ inventory_hostname_short }}-b
+use.canned.co.response=false
+
+run.jdbc.quartz.scheduler.on.this.server=false
+run.ram.quartz.scheduler.on.this.server=true
+
+# Scheduler used for jobs that should only run on one server per cluster
+run.quartz.scheduler.on.this.server=true
+
+server.port={{ vpsBport }}
+wsdl.rewrite.server.name={{ inventory_hostname_short }}

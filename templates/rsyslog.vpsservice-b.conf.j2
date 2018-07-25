@@ -1,0 +1,21 @@
+######## {{ app2 }}  ################
+$ModLoad imfile
+$InputFileName /vc/{{ app2 }}/current/standalone/log/server.log
+$InputFileTag {{ app2 }}_JB6:
+$InputFileStateFile {{ app2 }}_JB6
+$InputFileSeverity debug
+$InputRunFileMonitor
+
+$ModLoad imfile
+$InputFileName /vc/{{ app2 }}/current/standalone/log/authorizations.log
+$InputFileTag {{ app2 }}_VPS_Auth:
+$InputFileStateFile {{ app2 }}_VPS_Auth
+$InputFileSeverity debug
+$InputRunFileMonitor
+
+$ModLoad imfile
+$InputFileName /vc/{{ app2 }}/current/standalone/log/server.log
+$InputFileTag {{ app2 }}_Security:
+$InputFileStateFile {{ app2 }}_Security
+$InputFileSeverity debug
+$InputRunFileMonitor
